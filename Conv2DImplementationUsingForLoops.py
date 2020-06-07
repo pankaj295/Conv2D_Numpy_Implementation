@@ -143,7 +143,8 @@ w = np.random.randn(16, 3, 3, 3).astype(np.float32)
 b = np.random.randn(16, ).astype(np.float32)
 """
 
-print('Time taken by **conv2D_0**: {:.2f}s'.format(timeit.timeit(stmt = 'conv2D_0(x, w, b, pad = 0, stride = 1)', setup = setup_code, number=2**6)))
-print('Time taken by **conv2D_1**: {:.2f}s'.format(timeit.timeit(stmt = 'conv2D_1(x, w, b, pad = 0, stride = 1)', setup = setup_code, number=2**6)))
-print('Time taken by **conv2D_2**: {:.2f}s'.format(timeit.timeit(stmt = 'conv2D_2(x, w, b, pad = 0, stride = 1)', setup = setup_code, number=2**6)))
-print('Time taken by **conv2D_3**: {:.2f}s'.format(timeit.timeit(stmt = 'conv2D_3(x, w, b, pad = 0, stride = 1)', setup = setup_code, number=2**6)))
+Niter = 2**6
+print('Avg Time taken by **conv2D_0**: {:.2f}s'.format(timeit.timeit(stmt = 'conv2D_0(x, w, b, pad = 0, stride = 1)', setup = setup_code, number=Niter)/Niter))
+print('Avg Time taken by **conv2D_1**: {:.2f}s'.format(timeit.timeit(stmt = 'conv2D_1(x, w, b, pad = 0, stride = 1)', setup = setup_code, number=Niter)/Niter))
+print('Avg Time taken by **conv2D_2**: {:.2f}s'.format(timeit.timeit(stmt = 'conv2D_2(x, w, b, pad = 0, stride = 1)', setup = setup_code, number=Niter)/Niter))
+print('Avg Time taken by **conv2D_3**: {:.2f}s'.format(timeit.timeit(stmt = 'conv2D_3(x, w, b, pad = 0, stride = 1)', setup = setup_code, number=Niter)/Niter))
