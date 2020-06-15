@@ -136,10 +136,16 @@ print(conv2D_3(x, w, b, pad = 0, stride=1))
 setup_code = """
 import numpy as np
 from __main__ import conv2D_0, conv2D_1, conv2D_2, conv2D_3, conv2D_3
-
-x = np.random.randn(32, 3, 28, 28).astype(np.float32)
-w = np.random.randn(16, 3, 3, 3).astype(np.float32)
-b = np.random.randn(16, ).astype(np.float32)
+N = 32
+C = 3
+Hx=28
+Wx=28
+F = 16
+HH= 3
+WW=3
+x = np.random.randn(N, C, Hx, Wx).astype(np.float32)
+w = np.random.randn(F, C, HH, WW).astype(np.float32)
+b = np.random.randn(F, ).astype(np.float32)
 """
 
 Niter = 2**6
