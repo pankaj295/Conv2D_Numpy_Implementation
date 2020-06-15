@@ -4,21 +4,21 @@ import timeit
 ### CS231n Implementation
 def conv_forward_strides(x, w, b, pad = 0, stride = 1):
 
-    N, C, H, W      = x.shape
-    F, _, HH, WW    = w.shape
+    N, C, Hx, Wx= x.shape
+    F, _, HH, WW= w.shape
 
     # Pad the input
     x_padded = np.pad(x, ((0, 0), (0, 0), (pad, pad), (pad, pad)), mode='constant')
 
     # Figure out output dimensions
-    H += 2 * pad
-    W += 2 * pad
-    out_h = (H - HH) // stride + 1
-    out_w = (W - WW) // stride + 1
+    Hx += 2 * pad
+    Wx += 2 * pad
+    out_h = (Hx - HH) // stride + 1
+    out_w = (Wx - WW) // stride + 1
 
     # Perform an im2col operation by picking clever strides
-    shape   = (C,     HH, WW, N,         out_h,     out_w)
-    strides = (H * W, W,   1, C * H * W, stride * W, stride)
+    shape   = (C,       HH, WW, N,           out_h,       out_w)
+    strides = (Hx * Wx, Wx,  1, C * Hx * Wx, stride * Wx, stride)
     strides = x.itemsize * np.array(strides)
     x_stride= np.lib.stride_tricks.as_strided(x_padded, shape=shape, strides=strides)
 
@@ -43,10 +43,10 @@ def conv_forward_strides(x, w, b, pad = 0, stride = 1):
 ### CS231n Implementation
 def get_im2col_indices(x_shape, field_height, field_width, pad=0, stride=1):
     # First figure out what the size of the output should be
-    C, H, W = x_shape[1:]
+    C, Hx, Wx = x_shape[1:]
 
-    out_height  = (H + 2*pad - field_height) // stride + 1
-    out_width   = (W + 2*pad - field_width ) // stride + 1
+    out_height  = (Hx + 2*pad - field_height) // stride + 1
+    out_width   = (Wx + 2*pad - field_width ) // stride + 1
 
     i0 = np.repeat(np.arange(field_height), field_width)
     i0 = np.tile(i0, C)
@@ -82,14 +82,14 @@ def conv_forward_im2col(x, w, b, pad = 0, stride = 1):
     A fast implementation of the forward pass for a convolutional layer
     based on im2col and col2im.
     """
-    N, _, H, W = x.shape
-    num_filters, _, filter_height, filter_width = w.shape
+    N, _, Hx, Wx= x.shape
+    F, _, HH, WW= w.shape
 
     # Create output
-    out_height  = (H + 2 * pad - filter_height) // stride + 1
-    out_width   = (W + 2 * pad - filter_width ) // stride + 1
+    out_height  = (Hx + 2 * pad - HH) // stride + 1
+    out_width   = (Wx + 2 * pad - WW) // stride + 1
 
-    out         = np.zeros((N, num_filters, out_height, out_width), dtype=x.dtype)
+    out         = np.zeros((N, F, out_height, out_width), dtype=x.dtype)
 
     x_cols = im2col_indices(x, w.shape[2], w.shape[3], pad, stride)
     res = w.reshape((w.shape[0], -1)).dot(x_cols) + b.reshape(-1, 1)
@@ -101,7 +101,7 @@ def conv_forward_im2col(x, w, b, pad = 0, stride = 1):
 
 ### Implementation from blog: https://sgugger.github.io/convolution-in-depth.html
 def convForward(x, w, b, pad=0, stride=1):
-    N, _, H, W = x.shape
+    N, _, Hx, Wx = x.shape
     F, _, HH, WW = w.shape
 
     weights = w.reshape((F, -1)).transpose(1, 0)
@@ -109,8 +109,8 @@ def convForward(x, w, b, pad=0, stride=1):
     y = arr2vec(x, (HH, WW), stride, pad) @ weights + b
     y = np.transpose(y, (0, 2, 1))
 
-    Hy = (H - HH + 2*pad)//stride + 1
-    Wy = (W - WW + 2*pad)//stride + 1
+    Hy = (Hx - HH + 2*pad)//stride + 1
+    Wy = (Wx - WW + 2*pad)//stride + 1
 
     return y.reshape(N, F, Hy, Wy)
 
@@ -118,12 +118,12 @@ def arr2vec(x, kernel_size, stride=1, pad=0):
 
     x_padded    = np.pad(x, ((0, 0), (0, 0), (pad, pad), (pad, pad)), mode='constant')
 
-    N, C, H, W  = x_padded.shape
+    N, C, Hx, Wx= x_padded.shape
     HH, WW      = kernel_size
 
-    grid        = np.array([j + W*i + H*W*k for k in range(C) for i in range(HH) for j in range(WW)])
-    start_idx   = np.array([j + W*i         for i in range(0, H-HH+1, stride) for j in range(0, W-WW+1, stride)])
-    batch       = np.array(range(N)) * C * H * W
+    grid        = np.array([j + Wx*i + Hx*Wx*k for k in range(C) for i in range(HH) for j in range(WW)])
+    start_idx   = np.array([j + Wx*i           for i in range(0, Hx-HH+1, stride) for j in range(0, Wx-WW+1, stride)])
+    batch       = np.array(range(N)) * C * Hx * Wx
 
     return x_padded.take(batch[:, None, None] + start_idx[None, :, None] + grid[None, None, :])
 
@@ -142,9 +142,16 @@ setup_code = """
 import numpy as np
 from __main__ import conv_forward_strides, conv_forward_im2col, convForward
 
-x = np.random.randn(32, 3, 28, 28).astype(np.float32)
-w = np.random.randn(16, 3, 3, 3).astype(np.float32)
-b = np.random.randn(16, ).astype(np.float32)
+N = 32
+C = 3
+Hx= 28
+Wx= 28
+F = 16
+HH= 3
+WW= 3
+x = np.random.randn(N, C, Hx, Wx).astype(np.float32)
+w = np.random.randn(F, C, HH, WW).astype(np.float32)
+b = np.random.randn(F, ).astype(np.float32)
 """
 Niter = 2**12
 print('Avg Time taken by **conv_forward_strides**: {:.4f}s'.format(timeit.timeit(stmt = 'conv_forward_strides(x, w, b, pad = 0, stride = 1)', setup = setup_code, number=Niter)/Niter))
