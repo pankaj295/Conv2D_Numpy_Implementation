@@ -3,15 +3,15 @@ import timeit
 
 ### 2D Conv using 4 For loops
 def conv2D_0(x, w, b, pad = 0, stride=1):
-    N, C, H, W  = x.shape
+    N, C, Hx, Wx= x.shape
     F, _, HH, WW= w.shape
 
     # Zero-pad Input
     x_padded = np.pad(x, ((0, 0), (0, 0), (pad, pad), (pad, pad)), 'constant')
 
     # Initialize the output matrix
-    Hy = 1 + (H + 2*pad - HH)//stride
-    Wy = 1 + (W + 2*pad - WW)//stride
+    Hy = 1 + (Hx + 2*pad - HH)//stride
+    Wy = 1 + (Wx + 2*pad - WW)//stride
 
     out = np.zeros((N, F, Hy, Wy))
 
@@ -31,15 +31,15 @@ def conv2D_0(x, w, b, pad = 0, stride=1):
 
 ### 2D Conv using 4 For loops - other implementation (re-arranging for loops)
 def conv2D_1(x, w, b, pad = 0, stride=1):
-    N, C, H, W  = x.shape
+    N, C, Hx, Wx= x.shape
     F, _, HH, WW= w.shape
 
     # Zero-pad Input
     x_padded = np.pad(x, ((0, 0), (0, 0), (pad, pad), (pad, pad)), 'constant')
 
     # Initialize the output matrix
-    Hy = 1 + (H + 2*pad - HH)//stride
-    Wy = 1 + (W + 2*pad - WW)//stride
+    Hy = 1 + (Hx + 2*pad - HH)//stride
+    Wy = 1 + (Wx + 2*pad - WW)//stride
 
     out = np.zeros((N, F, Hy, Wy))
 
@@ -61,15 +61,15 @@ def conv2D_1(x, w, b, pad = 0, stride=1):
 
 ### 2D Conv using 3 For loops
 def conv2D_2(x, w, b, pad = 0, stride=1):
-    N, C, H, W  = x.shape
+    N, C, Hx, Wx= x.shape
     F, _, HH, WW= w.shape
 
     # Zero-pad Input
     x_padded = np.pad(x, ((0, 0), (0, 0), (pad, pad), (pad, pad)), 'constant')
 
     # Initialize the output matrix
-    Hy = 1 + (H + 2*pad - HH)//stride
-    Wy = 1 + (W + 2*pad - WW)//stride
+    Hy = 1 + (Hx + 2*pad - HH)//stride
+    Wy = 1 + (Wx + 2*pad - WW)//stride
 
     out = np.zeros((N, F, Hy, Wy))
 
@@ -80,6 +80,7 @@ def conv2D_2(x, w, b, pad = 0, stride=1):
         for hh in range(Hy):
             h_start = hh*stride
             h_end   = h_start + HH
+            
             for ww in range(Wy):
                 w_start = ww*stride
                 w_end   = w_start + WW
@@ -91,15 +92,15 @@ def conv2D_2(x, w, b, pad = 0, stride=1):
 
 ### 2D Conv using 2 For loops
 def conv2D_3(x, w, b, pad = 0, stride=1):
-    N, C, H, W  = x.shape
+    N, C, Hx, Wx= x.shape
     F, _, HH, WW= w.shape
 
     # Zero-pad Input
     x_padded = np.pad(x, ((0, 0), (0, 0), (pad, pad), (pad, pad)), 'constant')
 
     # Initialize the output matrix
-    Hy = 1 + (H + 2*pad - HH)//stride
-    Wy = 1 + (W + 2*pad - WW)//stride
+    Hy = 1 + (Hx + 2*pad - HH)//stride
+    Wy = 1 + (Wx + 2*pad - WW)//stride
 
     out = np.zeros((N, F, Hy, Wy))
 
@@ -109,6 +110,7 @@ def conv2D_3(x, w, b, pad = 0, stride=1):
     for hh in range(Hy):
         h_start = hh*stride
         h_end   = h_start + HH
+        
         for ww in range(Wy):
             w_start = ww*stride
             w_end   = w_start + WW
